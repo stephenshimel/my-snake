@@ -29,7 +29,6 @@ const SnakeBoard = () => {
 	// each time snake array updates, re-draw it on canvas
 	useEffect(() => {
 		drawSnake();
-		console.log("re-draw", snake);
 	}, [snake]);
 
 	const clearScreen = () => {
@@ -38,14 +37,23 @@ const SnakeBoard = () => {
 	};
 
 	const updateSnake = () => {
-		const copy = [...snake];
+		// have to store v locally otherwise setiterval will force it to be the intial value
+		let xVelocity_copy, yVelocity_copy;
+		setXVelocity((xVelocity) => {
+			xVelocity_copy = xVelocity;
+			return xVelocity;
+		});
+		setYVelocity((yVelocity) => {
+			yVelocity_copy = yVelocity;
+			return yVelocity;
+		});
 
-		copy.unshift([copy[0][0] + xVelocity, copy[0][1] + yVelocity]);
-		copy.pop();
 		setSnake((snake) => {
 			const copy = [...snake];
-			copy.unshift([copy[0][0] + xVelocity, copy[0][1] + yVelocity]);
+			copy.unshift([copy[0][0] + xVelocity_copy, copy[0][1] + yVelocity_copy]);
 			copy.pop();
+			// console.log("v being used:", xVelocity_copy, yVelocity_copy); //bug: not using updated v
+
 			return copy;
 		}); //? why diff from removing pre =>
 	};
@@ -62,6 +70,10 @@ const SnakeBoard = () => {
 			ctxRef.current.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
 		}
 	};
+
+	useEffect(() => {
+		console.log("v updated to:", xVelocity, yVelocity);
+	}, [xVelocity, yVelocity]);
 
 	const keyDown = (event) => {
 		// left
