@@ -10,9 +10,10 @@ const SnakeBoard = () => {
 	const [xVelocity, setXVelocity] = useState(0);
 	const [yVelocity, setYVelocity] = useState(-1);
 	const [snake, setSnake] = useState([
-		[0, 0],
-		[0, 1],
-		[1, 1],
+		[10, 10],
+		[10, 11],
+		[11, 11],
+		[12, 11],
 	]);
 
 	const canvasRef = useRef();
@@ -21,14 +22,32 @@ const SnakeBoard = () => {
 	const drawGame = () => {
 		setInterval(() => {
 			clearScreen();
-			drawSnake();
-			console.log("setInterval");
+			updateSnake();
 		}, 1000 / speed);
 	};
+
+	// each time snake array updates, re-draw it on canvas
+	useEffect(() => {
+		drawSnake();
+		console.log("re-draw", snake);
+	}, [snake]);
 
 	const clearScreen = () => {
 		ctxRef.current.fillStyle = "black";
 		ctxRef.current.fillRect(0, 0, 400, 400);
+	};
+
+	const updateSnake = () => {
+		const copy = [...snake];
+
+		copy.unshift([copy[0][0] + xVelocity, copy[0][1] + yVelocity]);
+		copy.pop();
+		setSnake((snake) => {
+			const copy = [...snake];
+			copy.unshift([copy[0][0] + xVelocity, copy[0][1] + yVelocity]);
+			copy.pop();
+			return copy;
+		}); //? why diff from removing pre =>
 	};
 
 	const drawSnake = () => {
@@ -38,8 +57,10 @@ const SnakeBoard = () => {
 	};
 
 	const drawDot = (x, y) => {
-		ctxRef.current.fillStyle = "orange";
-		ctxRef.current.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+		if (ctxRef.current) {
+			ctxRef.current.fillStyle = "orange";
+			ctxRef.current.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+		}
 	};
 
 	const keyDown = (event) => {
