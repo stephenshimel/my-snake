@@ -2,66 +2,76 @@ import React, { useEffect, useRef, useState } from "react";
 import { GameBorad } from "./SnakeBoard.style";
 
 const SnakeBoard = () => {
-	const [speed, setSpeed] = useState(7);
+	const [speed, setSpeed] = useState(1);
 	const [tileCount, setTileCount] = useState(20);
 	const [tileSize, setTileSize] = useState(20);
-	const [headX, setHeadX] = useState(10);
-	const [headY, setHeadY] = useState(10);
-	const [direction, setDirection] = useState("up");
+
+	//init going up
+	const [xVelocity, setXVelocity] = useState(0);
+	const [yVelocity, setYVelocity] = useState(-1);
+	const [snake, setSnake] = useState([
+		[0, 0],
+		[0, 1],
+		[1, 1],
+	]);
 
 	const canvasRef = useRef();
 	const ctxRef = useRef();
-	const a = useRef();
 
 	const drawGame = () => {
-		clearScreen();
-		drawSnake();
-		setTimeout(drawGame, 1000 / speed);
+		setInterval(() => {
+			clearScreen();
+			drawSnake();
+			console.log("setInterval");
+		}, 1000 / speed);
 	};
 
 	const clearScreen = () => {
 		ctxRef.current.fillStyle = "black";
-		ctxRef.current.fillRect(
-			0,
-			0,
-			canvasRef.current.width,
-			canvasRef.current.height
-		);
+		ctxRef.current.fillRect(0, 0, 400, 400);
 	};
 
 	const drawSnake = () => {
+		for (let [x, y] of snake) {
+			drawDot(x, y);
+		}
+	};
+
+	const drawDot = (x, y) => {
 		ctxRef.current.fillStyle = "orange";
-		ctxRef.current.fillRect(
-			headX * tileSize,
-			headY * tileSize,
-			tileSize,
-			tileSize
-		);
+		ctxRef.current.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
 	};
 
 	const keyDown = (event) => {
+		// left
 		if (event.keyCode === 37) {
-			a.current = "left";
+			setXVelocity(-1);
+			setYVelocity(0);
 		}
-		if (event.keyCode === 38) {
-			a.current = "up";
+		// top
+		else if (event.keyCode === 38) {
+			setXVelocity(0);
+			setYVelocity(-1);
 		}
-		if (event.keyCode === 39) {
-			a.current = "right";
+		// right
+		else if (event.keyCode === 39) {
+			setXVelocity(1);
+			setYVelocity(0);
 		}
-		if (event.keyCode === 40) {
-			a.current = "down";
+		// down
+		else if (event.keyCode === 40) {
+			setXVelocity(0);
+			setYVelocity(1);
 		}
-		console.log(a.current);
+		// useState is asynchronizes so can't use is right after changing its value. solution is to put it in an useEffect
 	};
 
+	// ! put addEventListener into componentDidMount so that it won't be binded repetively
 	useEffect(() => {
 		ctxRef.current = canvasRef.current.getContext("2d");
 		drawGame();
-	});
-
-	// bug: event triggered twice instead of one
-	document.addEventListener("keydown", (event) => keyDown(event));
+		document.addEventListener("keydown", (event) => keyDown(event));
+	}, []);
 
 	return (
 		<GameBorad>
